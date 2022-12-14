@@ -31,7 +31,7 @@ public class PlayerController : MonoBehaviour, IPlayerController {
     void Activate() =>  _active = true;
     
     private void Update() {
-        if(!_active) return;
+        if(!_active || Time.timeScale == 0) return;
         // Calculate velocity
         Velocity = (transform.position - _lastPosition) / Time.deltaTime;
         _lastPosition = transform.position;

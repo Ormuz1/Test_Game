@@ -19,14 +19,17 @@ public class PlayerShoot : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private UltEvents.UltEvent OnGroundHit;
     [SerializeField] private UltEvents.UltEvent OnAttackFullyCharged;
+    [SerializeField] private UltEvents.UltEvent OnEnemyHit;
     private ContactFilter2D hitboxFilter;
     private PlayerAnimation playerAnimation;
+    private PlayerController playerController;
     private bool attackInput;
     private bool isAttacking;
     private bool canAttack;
 
     private void Awake() {
         playerAnimation = GetComponent<PlayerAnimation>();
+        playerController = GetComponent<PlayerController>();
         hammerRB = hammerObject.GetComponent<Rigidbody2D>();
         hammerHitbox.enabled = false;
         isAttacking = false;
@@ -56,7 +59,6 @@ public class PlayerShoot : MonoBehaviour
         playerAnimation.canTurnAround = false;
         isAttacking = true;
         float lerpAmount = Utility.InverseLerp(hammerNormalPosition.position, hammerChargedPosition.position, hammerObject.position);
-
         for(float timer = lerpAmount * hammerChargeTime; timer < hammerChargeTime; timer += Time.deltaTime)
         {
             if(!attackInput) 
@@ -66,7 +68,7 @@ public class PlayerShoot : MonoBehaviour
                 StartCoroutine(ReturnWeaponToOriginalPosition(timer));
                 yield break;
             }
-            hammerRB.MovePosition(Vector3.Lerp(hammerNormalPosition.position, hammerChargedPosition.position, timer / hammerChargeTime));
+            hammerObject.position = Vector3.Lerp(hammerNormalPosition.position, hammerChargedPosition.position, timer / hammerChargeTime);
             hammerObject.rotation = Quaternion.Lerp(hammerNormalPosition.rotation, hammerChargedPosition.rotation, timer / hammerChargeTime);
             yield return null;
         }
@@ -88,17 +90,17 @@ public class PlayerShoot : MonoBehaviour
         {
             if(timer < halfAttackTime)
             {
-                hammerRB.MovePosition(Vector3.MoveTowards(hammerObject.position, hammerNormalPosition.position, speed * Time.fixedDeltaTime));
+                hammerObject.position = Vector3.MoveTowards(hammerObject.position, hammerNormalPosition.position, speed * Time.fixedDeltaTime);
                 hammerRB.MoveRotation(Quaternion.Lerp(hammerChargedPosition.rotation, hammerNormalPosition.rotation, timer / halfAttackTime));
                 yield return new WaitForFixedUpdate();
             }
             else
             {
-                hammerRB.MovePosition(Vector3.MoveTowards(hammerObject.position, hammerSwingPosition.position, speed * Time.fixedDeltaTime));
+                hammerObject.position = Vector3.MoveTowards(hammerObject.position, hammerSwingPosition.position, speed * Time.fixedDeltaTime);
                 hammerRB.MoveRotation(Quaternion.Lerp(hammerNormalPosition.rotation, hammerSwingPosition.rotation, (timer - halfAttackTime) / halfAttackTime));
                 yield return new WaitForFixedUpdate();
             }
-
+            Physics2D.SyncTransforms();
             Enemy[] enemiesHit = GetAllEnemiesHit();
             if(enemiesHit.Length == 0)
                 continue;
@@ -106,6 +108,7 @@ public class PlayerShoot : MonoBehaviour
             {
                 enemyHit.OnAttackHit();
             }
+            OnEnemyHit.Invoke();
             break;
         }
         if(hammerHitbox.IsTouchingLayers(groundLayer))
