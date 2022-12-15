@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField] public UltEvents.UltEvent OnHit;
     [SerializeField] private float invulnerabilityTime;
     private bool isVulnerable;
     private float invulnerabilityTimer;
@@ -12,21 +13,4 @@ public class Enemy : MonoBehaviour
     private void Awake() {
         isVulnerable = true;
     }
-
-    private void Update() {
-        if (!isVulnerable)
-        {
-            invulnerabilityTimer -= Time.deltaTime;
-            isVulnerable = invulnerabilityTimer <= 0;
-        }
-    }
-    public void OnAttackHit()
-    {
-        if(!isVulnerable)
-            return;
-        Debug.Log("I'm hit!", this);
-        isVulnerable = false;
-        invulnerabilityTimer = invulnerabilityTime;
-    }
-
 }

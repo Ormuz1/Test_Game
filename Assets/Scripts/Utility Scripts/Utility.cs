@@ -26,6 +26,18 @@ public static class Utility
     {
         GameObject.Instantiate(go, point);
     }
+
+    public static Vector3 GetSingleContactPoint(Collider2D collider1, Collider2D collider2)
+    {
+        List<ContactPoint2D> contacts = new List<ContactPoint2D>();
+        collider1.GetContacts(contacts);
+        foreach (ContactPoint2D contact in contacts)
+        {
+            if (contact.otherCollider == collider2)
+                return contact.point;
+        }
+        return Vector3.zero;
+    }
 }
 
 [System.Serializable]

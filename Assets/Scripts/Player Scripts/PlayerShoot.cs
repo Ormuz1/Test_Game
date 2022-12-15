@@ -86,6 +86,7 @@ public class PlayerShoot : MonoBehaviour
         float totalDist = dist1 + dist2;
         float speed = totalDist / hammerSwingTime;
         float halfAttackTime = hammerSwingTime / 2;
+        List<Enemy> enemiesAlreadyHit = new List<Enemy>();
         for(float timer = 0; timer < hammerSwingTime; timer += Time.fixedDeltaTime)
         {
             if(timer < halfAttackTime)
@@ -102,14 +103,16 @@ public class PlayerShoot : MonoBehaviour
             }
             Physics2D.SyncTransforms();
             Enemy[] enemiesHit = GetAllEnemiesHit();
-            if(enemiesHit.Length == 0)
-                continue;
-            foreach (Enemy enemyHit in GetAllEnemiesHit())
+
+
+            foreach (Enemy enemy in GetAllEnemiesHit())
             {
-                enemyHit.OnAttackHit();
+                if (enemiesAlreadyHit.Contains(enemy))
+                    continue;
+                enemiesAlreadyHit.Add(enemy);
+                enemy.OnHit.Invoke();
+                OnEnemyHit.Invoke();
             }
-            OnEnemyHit.Invoke();
-            break;
         }
         if(hammerHitbox.IsTouchingLayers(groundLayer))
         {

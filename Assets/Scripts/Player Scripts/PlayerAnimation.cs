@@ -6,25 +6,24 @@ using UnityEngine;
 public class PlayerAnimation : MonoBehaviour
 {
     private SpriteRenderer spriteRenderer;
-    private PlayerController playerController;
-    private int playerLastLookDirection;
     public bool canTurnAround = true;
+    private int playerLookDirection = 1;
+    private int playerLastLookDirection;
     private void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        playerController = GetComponent<PlayerController>();
         canTurnAround = true;
-    }
-    void Start()
-    {
-        playerLastLookDirection = playerController.playerLookDirection;
+        playerLookDirection = 1;
+        playerLastLookDirection = playerLookDirection;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (canTurnAround && playerController.playerLookDirection != playerLastLookDirection)
+        int horizontalInput = (int) Input.GetAxisRaw("Horizontal");
+        playerLookDirection = horizontalInput != 0 ? horizontalInput : playerLookDirection;
+        if (canTurnAround && playerLookDirection != playerLastLookDirection)
         {
-            playerLastLookDirection = playerController.playerLookDirection;
+            playerLastLookDirection = playerLookDirection;
             spriteRenderer.flipX = !spriteRenderer.flipX;
             FlipAllChildren(transform);
         }
